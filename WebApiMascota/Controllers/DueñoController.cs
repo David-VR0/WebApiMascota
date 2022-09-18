@@ -17,10 +17,39 @@ namespace WebApiMascota.Controllers
         }
         
          [HttpGet]
-         public async Task<ActionResult<List<Dueño>>> Get(){
+         public async Task<ActionResult<List<Dueño>>> GetDueños(){
             return await dbContext.Dueños.Include( x => x.mascotas).ToListAsync();
          }
+        [HttpGet("primero")]
+        public async Task<ActionResult<Dueño>> PrimerDueño()
+        {
+            return await dbContext.Dueños.Include(x => x.mascotas).FirstOrDefaultAsync();
+        }
 
+        [HttpGet("id")]
+        public async Task<ActionResult<Dueño>> Get(int id)
+        {
+            var mascota = await dbContext.Dueños.Include(x => x.mascotas).FirstOrDefaultAsync(x => x.Id == id);
+
+            if (mascota == null)
+            {
+                return NotFound();
+            }
+
+            return mascota;
+        }
+        [HttpGet("Nombre")]
+        public async Task<ActionResult<Dueño>> GetNombre(String nombre)
+        {
+            var mascota = await dbContext.Dueños.Include(x => x.mascotas).FirstOrDefaultAsync(x => x.Nombre == nombre);
+
+            if (mascota == null)
+            {
+                return NotFound();
+            }
+
+            return mascota;
+        }
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] Dueño dueño)
         {

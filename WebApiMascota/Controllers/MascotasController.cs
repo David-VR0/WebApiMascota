@@ -18,6 +18,25 @@ namespace WebApiMascota.Controllers
         {
             return await dbContext.Mascotas.ToListAsync();
         }
+        [HttpGet("primero")]
+        public async Task<ActionResult<Mascota>> PrimerMascota()
+        {
+            return await dbContext.Mascotas.FirstOrDefaultAsync();
+        }
+
+        [HttpGet("id")]
+        public async Task<ActionResult<Mascota>> Get(int id)
+        {
+            var mascota = await dbContext.Mascotas.FirstOrDefaultAsync(x =>x.Id == id);
+            
+            if (mascota == null)
+            {
+                return NotFound();
+            }
+
+            return mascota;
+        }
+        
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] Mascota mascota)
         {

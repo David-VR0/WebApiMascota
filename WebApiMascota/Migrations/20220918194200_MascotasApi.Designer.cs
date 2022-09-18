@@ -11,7 +11,7 @@ using WebApiMascota;
 namespace WebApiMascota.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220915002150_MascotasApi")]
+    [Migration("20220918194200_MascotasApi")]
     partial class MascotasApi
     {
         /// <inheritdoc />
@@ -36,6 +36,10 @@ namespace WebApiMascota.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Telefono")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -58,9 +62,11 @@ namespace WebApiMascota.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Nombre")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tipo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
