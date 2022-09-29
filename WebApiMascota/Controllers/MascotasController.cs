@@ -24,7 +24,7 @@ namespace WebApiMascota.Controllers
             return await dbContext.Mascotas.FirstOrDefaultAsync();
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<Mascota>> Get(int id)
         {
             var mascota = await dbContext.Mascotas.FirstOrDefaultAsync(x =>x.Id == id);
@@ -36,7 +36,18 @@ namespace WebApiMascota.Controllers
 
             return mascota;
         }
-        
+        [HttpGet("{nombre}")]
+        public async Task<ActionResult<Mascota>> GetNombre(String nombre)
+        {
+            var mascota = await dbContext.Mascotas.FirstOrDefaultAsync(x => x.Nombre == nombre);
+
+            if (mascota == null)
+            {
+                return NotFound();
+            }
+
+            return mascota;
+        }
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] Mascota mascota)
         {
