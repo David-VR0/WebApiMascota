@@ -1,6 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 using WebApiMascota;
-
+using WebApiMascota.Services;
+using WebApiMascota.Middlewares;
+using WebApiMascota.Filtros;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 namespace WebApiMarcota
 {
     public class Startup
@@ -15,16 +24,45 @@ namespace WebApiMarcota
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<IService, ServiceA>();
+            services.AddTransient<ServiceTransient>();
+            services.AddTransient<ServiceTransient>();
+            services.AddScoped<ServiceScoped>();
+            services.AddSingleton<ServiceSingleton>();
+            services.AddTransient<FiltroDeAccion>();
+            services.AddHostedService<EscribirEnArchivo>();
+            services.AddResponseCaching();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiMascota", Version = "v1" });
+            });
         }
         
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+
+            app.UseResponseHttpMiddleware();
+
+            app.Map("/maping", app =>
+            {
+                app.Run(async context =>
+                {
+                    await context.Response.WriteAsync("Interceptando las peticiones");
+                });
+            });
+
+
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
             {
@@ -43,5 +81,6 @@ namespace WebApiMarcota
                 endpoints.MapControllers();
             });
         }
+
     }
 }

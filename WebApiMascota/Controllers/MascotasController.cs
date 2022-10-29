@@ -9,13 +9,17 @@ namespace WebApiMascota.Controllers
     public class MascotasController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        public MascotasController(ApplicationDbContext context)
+        private readonly ILogger<MascotasController> log;
+
+        public MascotasController(ApplicationDbContext context, ILogger<MascotasController> log)
         {
             this.dbContext = context;
+            this.log = log;
         }
         [HttpGet]
         public async Task<ActionResult<List<Mascota>>> GetAll()
         {
+            log.LogInformation("Obteniendo listado de mascotas");
             return await dbContext.Mascotas.ToListAsync();
         }
         [HttpGet("primero")]
@@ -33,7 +37,7 @@ namespace WebApiMascota.Controllers
             {
                 return NotFound();
             }
-
+            log.LogInformation("EL ID ES: " + id);
             return mascota;
         }
         [HttpGet("{nombre}")]

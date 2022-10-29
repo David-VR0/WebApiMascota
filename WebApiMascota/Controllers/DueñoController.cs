@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiMascota.Entidades;
+using WebApiMascota.Services;
+using WebApiMascota.Filtros;
 
 namespace WebApiMascota.Controllers
 {
@@ -11,15 +13,56 @@ namespace WebApiMascota.Controllers
     {
 
         private readonly ApplicationDbContext dbContext;
-        public DueñoController(ApplicationDbContext context)
+        private readonly IService service;
+        private readonly ServiceTransient serviceTransient;
+        private readonly ServiceScoped serviceScoped;
+        private readonly ServiceSingleton serviceSingleton;
+        private readonly ILogger<DueñoController> logger;
+        private readonly IWebHostEnvironment env;
+        private readonly string nuevosRegistros = "nuevosRegistros.txt";
+        private readonly string registrosConsultados = "registrosConsultados.txt";
+        public DueñoController(ApplicationDbContext context, IService service,
+            ServiceTransient serviceTransient, ServiceScoped serviceScoped,
+            ServiceSingleton serviceSingleton, ILogger<DueñoController> logger,
+            IWebHostEnvironment env)
         {
             this.dbContext = context;
+            this.service = service;
+            this.serviceTransient = serviceTransient;
+            this.serviceScoped = serviceScoped;
+            this.serviceSingleton = serviceSingleton;
+            this.logger = logger;
+            this.env = env;
         }
-        
-         [HttpGet]
+
+        [HttpGet("GUID")]
+        [ResponseCache(Duration = 10)]
+        [ServiceFilter(typeof(FiltroDeAccion))]
+        public ActionResult ObtenerGuid()
+        {
+            throw new NotImplementedException();
+            logger.LogInformation("Durante la ejecucion");
+            return Ok(new
+            {
+                DueñosControllerTransient = serviceTransient.guid,
+                ServiceA_Transient = service.GetTransient(),
+                DueñosControllerScoped = serviceScoped.guid,
+                ServiceA_Scoped = service.GetScoped(),
+                DueñosControllerSingleton = serviceSingleton.guid,
+                ServiceA_Singleton = service.GetSingleton()
+            });
+        }
+
+        [HttpGet]
          [HttpGet("listado")]
          [HttpGet("/listado")]
          public async Task<ActionResult<List<Dueño>>> GetDueños(){
+
+            //throw new NotImplementedException();
+            logger.LogInformation("Se obtiene el listado de dueños");
+            logger.LogWarning("Mensaje de prueba warning");
+            service.EjecutarJob();
+
             return await dbContext.Dueños.Include( x => x.mascotas).ToListAsync();
          }
         [HttpGet("primero")]
@@ -52,8 +95,12 @@ namespace WebApiMascota.Controllers
 
             if (dueño == null)
             {
+                logger.LogError("No se encuentra el deuño. ");
                 return NotFound();
             }
+
+            var ruta = $@"{env.ContentRootPath}\wwwroot\{registrosConsultados}";
+            using (StreamWriter writer = new StreamWriter(ruta, append: true)) { writer.WriteLine(dueño.Id + " " + dueño.Nombre); }
 
             return dueño;
         }
