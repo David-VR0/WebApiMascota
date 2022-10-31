@@ -21,13 +21,14 @@ namespace WebApiMascota.Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             //Se ejecuta cuando cargamos la aplicacion 1 vez
-            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
             Escribir("Proceso Iniciado");
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            // Se ejecuta cuando detenemos la aplicacion aunque puede que no se ejecute por algun error. 
             timer.Dispose();
             Escribir("Proceso Finalizado");
             return Task.CompletedTask;
@@ -36,7 +37,7 @@ namespace WebApiMascota.Services
         private void DoWork(object state)
         {
             Escribir("Proceso en ejecucion: " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-            //GuardarMascotas();
+            //GuardarDueños();
         }
         private void Escribir(string msg)
         {
@@ -48,9 +49,9 @@ namespace WebApiMascota.Services
         private void GuardarDueños()
         {
             //var ruta = $@"{env.ContentRootPath}\wwwroot\{archivo}";
-            //ActionResult task = dueñosController.ObtenerGuid();
-            //object Dueño = task.Result.Value;
-            //using (StreamWriter writer = new StreamWriter(ruta, append: true)) { writer.WriteLine(Dueño); }
+            //ActionResult task = alumnosController.ObtenerGuid();
+            //object Alumno = task.Result.Value;
+            //using (StreamWriter writer = new StreamWriter(ruta, append: true)) { writer.WriteLine(Alumno); }
         }
     }
 }

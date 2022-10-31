@@ -24,15 +24,17 @@ namespace WebApiMarcota
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddJsonOptions(x =>
-                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddControllers(opciones =>
+            {
+                opciones.Filters.Add(typeof(FiltroDeExcepcion));
+            }).AddJsonOptions(x =>
+            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+            // Se encarga de configurar ApplicationDbContext como un servicio
+            services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
             services.AddTransient<IService, ServiceA>();
-            services.AddTransient<ServiceTransient>();
             services.AddTransient<ServiceTransient>();
             services.AddScoped<ServiceScoped>();
             services.AddSingleton<ServiceSingleton>();
@@ -44,14 +46,13 @@ namespace WebApiMarcota
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiMascota", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiMascotas", Version = "v1" });
             });
         }
         
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
-
             app.UseResponseHttpMiddleware();
 
             app.Map("/maping", app =>
@@ -63,16 +64,16 @@ namespace WebApiMarcota
             });
 
 
-            // Configure the HTTP request pipeline.
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseResponseCaching();
 
             app.UseAuthorization();
 
